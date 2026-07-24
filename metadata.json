@@ -1,0 +1,6 @@
+{
+  "name": "USTED CGPA Mobile App",
+  "description": "Official CGPA & Academic Performance Tracker for students of the University of Skill Training and Entrepreneurial Development (USTED).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
