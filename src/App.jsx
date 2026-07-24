@@ -203,6 +203,7 @@ export default function App() {
         {activeTab === 'semester-detail' && (
           <SemesterDetailScreen
             semester={currentSelectedSemester}
+            allSemesters={semesters}
             onBack={() => setActiveTab('home')}
             onUpdateSemester={handleUpdateSemester}
             onUpdateCourseGrade={handleUpdateCourseGrade}

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { calculateSemesterGPA } from '../utils/calculator';
+import { calculateSemesterGPA, calculateCumulativeCGPA } from '../utils/calculator';
 import CourseCard from '../components/CourseCard';
-import { ArrowLeft, Plus, BookOpen, Clock, CheckCircle2, Trash2, Edit2, Calendar, Award } from 'lucide-react';
+import SGPAAnalyticsCard from '../components/SGPAAnalyticsCard';
+import { ArrowLeft, Plus, BookOpen, Clock, CheckCircle2, Trash2, Edit2, Calendar, Award, Sparkles, BarChart2 } from 'lucide-react';
 
 export default function SemesterDetailScreen({ 
   semester, 
+  allSemesters = [],
   onBack, 
   onUpdateSemester, 
   onUpdateCourseGrade, 
@@ -28,6 +30,7 @@ export default function SemesterDetailScreen({
     );
   }
 
+  const cumulativeStats = calculateCumulativeCGPA(allSemesters.length > 0 ? allSemesters : [semester]);
   const semStats = calculateSemesterGPA(semester.courses);
 
   const handleSaveTitle = (e) => {
@@ -66,7 +69,10 @@ export default function SemesterDetailScreen({
         </button>
       </div>
 
-      {/* Semester Header Box */}
+      {/* SGPA Analytics Detailed Card */}
+      <SGPAAnalyticsCard semester={semester} cumulativeCGPA={cumulativeStats.cgpa} />
+
+      {/* Semester Header Box / Rename Control */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 overflow-hidden">
         {isEditingTitle ? (
           <form onSubmit={handleSaveTitle} className="space-y-4">
@@ -115,7 +121,7 @@ export default function SemesterDetailScreen({
             <div>
               <div className="flex items-center space-x-3">
                 <h1 className="text-xl sm:text-2xl font-serif font-extrabold text-slate-900">
-                  {semester.name}
+                  {semester.name} Course Breakdown
                 </h1>
                 <button
                   onClick={() => setIsEditingTitle(true)}
@@ -141,64 +147,53 @@ export default function SemesterDetailScreen({
                 >
                   {semester.isCompleted ? (
                     <>
-                      <CheckCircle2 className="w-3 h-3" /> Completed
+                      <CheckCircle2 className="w-3 h-3" /> Semester Marked Completed
                     </>
                   ) : (
                     <>
-                      <Clock className="w-3 h-3" /> In Progress (Click to complete)
+                      <Clock className="w-3 h-3" /> Semester In Progress (Click to mark complete)
                     </>
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Big GPA Badge */}
-            <div className="flex items-center space-x-4 bg-amber-50 border border-amber-200/80 rounded-2xl p-4">
+            {/* Quick Status Pill */}
+            <div className="flex items-center space-x-3 bg-slate-50 border border-slate-200 rounded-2xl p-3.5">
               <div className="text-right">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-[#800000] block">
-                  Semester GPA
+                <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 block">
+                  Computed SGPA
                 </span>
-                <span className="text-3xl font-extrabold font-mono text-[#800000]">
+                <span className="text-2xl font-black font-mono text-[#800000]">
                   {semStats.gpa.toFixed(2)}
                 </span>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-[#800000] text-amber-300 flex items-center justify-center font-bold text-lg shadow-sm">
-                <Award className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-xl bg-[#800000] text-amber-300 flex items-center justify-center font-bold text-base shadow-2xs">
+                <BarChart2 className="w-5 h-5" />
               </div>
             </div>
           </div>
         )}
-
-        {/* Semester Stats Bar */}
-        <div className="grid grid-cols-3 divide-x divide-slate-100 bg-slate-50 border border-slate-200/80 rounded-xl mt-6 p-3 text-center text-xs">
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Courses</span>
-            <span className="text-base font-bold text-slate-800">{semStats.courseCount}</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Credit Hours</span>
-            <span className="text-base font-bold text-slate-800 font-mono">{semStats.totalCredits}</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Quality Points</span>
-            <span className="text-base font-bold text-[#800000] font-mono">{semStats.totalQualityPoints.toFixed(1)}</span>
-          </div>
-        </div>
       </div>
 
       {/* Courses List Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900 font-serif flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-[#800000]" /> Enrolled Courses ({semester.courses?.length || 0})
-          </h2>
+          <div>
+            <h2 className="text-base font-bold text-slate-900 font-serif flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-[#800000]" /> Enrolled Courses ({semester.courses?.length || 0})
+            </h2>
+            <p className="text-xs text-slate-500">
+              Change any course grade below to recalculate this semester's SGPA instantly
+            </p>
+          </div>
 
           <button
             onClick={() => onOpenAddCourse(semester.id)}
             className="bg-[#800000] hover:bg-[#600000] text-amber-300 font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition-all flex items-center space-x-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>Add New Course</span>
+            <span>Add Course</span>
           </button>
         </div>
 
@@ -216,7 +211,7 @@ export default function SemesterDetailScreen({
           ) : (
             <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-300 p-8">
               <p className="text-sm font-semibold text-slate-600 mb-1">No courses added yet</p>
-              <p className="text-xs text-slate-400 mb-4">Add your USTED subject codes and credit hours to compute GPA</p>
+              <p className="text-xs text-slate-400 mb-4">Add your USTED subject codes and credit hours to compute SGPA</p>
               <button
                 onClick={() => onOpenAddCourse(semester.id)}
                 className="bg-[#800000] text-amber-300 font-bold text-xs px-4 py-2 rounded-xl"

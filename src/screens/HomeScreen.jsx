@@ -1,5 +1,6 @@
 import React from 'react';
 import GPASummaryCard from '../components/GPASummaryCard';
+import SGPASemesterOverview from '../components/SGPASemesterOverview';
 import SemesterCard from '../components/SemesterCard';
 import { calculateCumulativeCGPA } from '../utils/calculator';
 import { Plus, BookOpen, Layers, Sparkles, GraduationCap } from 'lucide-react';
@@ -50,6 +51,9 @@ export default function HomeScreen({
 
       {/* Cumulative GPA Card */}
       <GPASummaryCard stats={cumulativeStats} semesters={semesters} />
+
+      {/* Semester SGPA Matrix Overview */}
+      <SGPASemesterOverview semesters={semesters} onSelectSemester={onSelectSemester} />
 
       {/* Semesters Section Header */}
       <div className="flex items-center justify-between pt-2">

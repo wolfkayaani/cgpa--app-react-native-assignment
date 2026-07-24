@@ -158,6 +158,163 @@ export function getDegreeClassificationBadgeDetails(classification) {
   }
 }
 
+export function getSGPAPerformanceDetails(sgpa) {
+  const gpaNum = Number(sgpa) || 0.0;
+
+  if (gpaNum >= 3.60) {
+    return {
+      rating: 'First Class / Distinction',
+      shortTag: 'First Class',
+      honorBadge: "Dean's List Honors",
+      color: '#15803d',
+      bgColor: '#f0fdf4',
+      borderColor: '#86efac',
+      textColor: 'text-emerald-800',
+      description: 'Outstanding semester performance matching First Class Honours criteria (3.60 - 4.00 SGPA).',
+      advice: 'Excellent work! You are maintaining an elite academic standing. Keep this momentum for graduation honors.',
+    };
+  }
+
+  if (gpaNum >= 3.00) {
+    return {
+      rating: 'Upper Second Class',
+      shortTag: 'Upper Second',
+      honorBadge: 'High Merit',
+      color: '#1d4ed8',
+      bgColor: '#eff6ff',
+      borderColor: '#93c5fd',
+      textColor: 'text-blue-800',
+      description: 'Strong academic performance matching Second Class Upper criteria (3.00 - 3.59 SGPA).',
+      advice: 'Great performance! A slight push in 1 or 2 courses can elevate your SGPA into First Class territory.',
+    };
+  }
+
+  if (gpaNum >= 2.50) {
+    return {
+      rating: 'Lower Second Class',
+      shortTag: 'Lower Second',
+      honorBadge: 'Good Standing',
+      color: '#0284c7',
+      bgColor: '#f0f9ff',
+      borderColor: '#bae6fd',
+      textColor: 'text-sky-800',
+      description: 'Solid satisfactory performance matching Second Class Lower criteria (2.50 - 2.99 SGPA).',
+      advice: 'Good steady progress. Focus on high credit-hour subjects next term to boost your average.',
+    };
+  }
+
+  if (gpaNum >= 2.00) {
+    return {
+      rating: 'Third Class / Pass',
+      shortTag: 'Third Class',
+      honorBadge: 'Average Standing',
+      color: '#d97706',
+      bgColor: '#fffbeb',
+      borderColor: '#fde047',
+      textColor: 'text-[#800000]',
+      description: 'Minimum required passing average (2.00 - 2.49 SGPA).',
+      advice: 'Passing standing, but close to probation threshold. Consider retaking or prioritizing weak courses.',
+    };
+  }
+
+  if (gpaNum >= 1.00) {
+    return {
+      rating: 'Pass / Below Average',
+      shortTag: 'Pass Only',
+      honorBadge: 'Warning Level',
+      color: '#c2410c',
+      bgColor: '#fff7ed',
+      borderColor: '#fdba74',
+      textColor: 'text-orange-900',
+      description: 'Below average academic standing (1.00 - 1.99 SGPA).',
+      advice: 'Academic risk detected. Consult your faculty advisor to establish a study plan and grade improvement strategy.',
+    };
+  }
+
+  return {
+    rating: 'Academic Probation / Fail',
+    shortTag: 'Unsatisfactory',
+    honorBadge: 'Critical Warning',
+    color: '#b91c1c',
+    bgColor: '#fef2f2',
+    borderColor: '#fca5a5',
+    textColor: 'text-[#800000]',
+    description: 'Unsatisfactory performance below 1.00 SGPA.',
+    advice: 'Critical academic concern. Urgent consultation with faculty guidance is strongly advised.',
+  };
+}
+
+export function getSemesterGradeDistribution(courses = []) {
+  const distribution = {
+    'A': 0,
+    'B+': 0,
+    'B': 0,
+    'C+': 0,
+    'C': 0,
+    'D+': 0,
+    'D': 0,
+    'F': 0,
+  };
+
+  let passedCredits = 0;
+  let totalCredits = 0;
+
+  courses.forEach((c) => {
+    const grade = c.grade || 'F';
+    if (distribution[grade] !== undefined) {
+      distribution[grade] += 1;
+    }
+    const credits = Number(c.creditHours) || 0;
+    totalCredits += credits;
+    if (grade !== 'F') {
+      passedCredits += credits;
+    }
+  });
+
+  const passRate = totalCredits > 0 ? Math.round((passedCredits / totalCredits) * 100) : 0;
+
+  return {
+    distribution,
+    passRate,
+    passedCredits,
+    totalCredits,
+    totalCourses: courses.length,
+  };
+}
+
+export function getSGPACGPAComparison(semesterGPA, cumulativeCGPA) {
+  const semGPA = Number(semesterGPA) || 0.0;
+  const cumCGPA = Number(cumulativeCGPA) || 0.0;
+
+  const diff = Number((semGPA - cumCGPA).toFixed(2));
+
+  if (diff > 0) {
+    return {
+      diff: `+${diff.toFixed(2)}`,
+      status: 'Boosted CGPA',
+      type: 'positive',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      description: `This semester's SGPA (${semGPA.toFixed(2)}) was higher than your cumulative CGPA (${cumCGPA.toFixed(2)}), lifting your overall grade!`,
+    };
+  } else if (diff < 0) {
+    return {
+      diff: `${diff.toFixed(2)}`,
+      status: 'Below CGPA',
+      type: 'negative',
+      badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
+      description: `This semester's SGPA (${semGPA.toFixed(2)}) was lower than your overall CGPA (${cumCGPA.toFixed(2)}).`,
+    };
+  }
+
+  return {
+    diff: '0.00',
+    status: 'Matched CGPA',
+    type: 'neutral',
+    badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
+    description: `This semester's SGPA aligns exactly with your cumulative CGPA (${cumCGPA.toFixed(2)}).`,
+  };
+}
+
 export function calculateTargetGPANeeded(currentCGPA, currentCredits, targetCGPA, upcomingCredits) {
   if (upcomingCredits <= 0) {
     return {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { calculateSemesterGPA } from '../utils/calculator';
+import { calculateSemesterGPA, getSGPAPerformanceDetails } from '../utils/calculator';
 import CourseCard from './CourseCard';
-import { Calendar, ChevronDown, ChevronUp, Plus, Trash2, CheckCircle2, Clock, ExternalLink } from 'lucide-react';
+import { Calendar, ChevronDown, ChevronUp, Plus, Trash2, CheckCircle2, Clock, ExternalLink, Award } from 'lucide-react';
 
 export default function SemesterCard({ 
   semester, 
@@ -14,21 +14,24 @@ export default function SemesterCard({
   const [isExpanded, setIsExpanded] = useState(true);
 
   const stats = calculateSemesterGPA(semester.courses);
+  const perfDetails = getSGPAPerformanceDetails(stats.gpa);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all overflow-hidden mb-6">
       {/* Semester Card Header */}
       <div className="p-5 bg-gradient-to-r from-slate-50 via-white to-amber-50/20 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#800000] text-amber-300 flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0">
-            {stats.gpa.toFixed(2)}
+          <div className="w-12 h-12 rounded-xl bg-[#800000] text-amber-300 flex flex-col items-center justify-center font-bold shadow-xs flex-shrink-0">
+            <span className="text-base font-extrabold font-mono leading-none">{stats.gpa.toFixed(2)}</span>
+            <span className="text-[8px] uppercase tracking-wider text-amber-200/90 mt-0.5">SGPA</span>
           </div>
 
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
               <h3 className="font-serif font-bold text-slate-900 text-base sm:text-lg">
                 {semester.name}
               </h3>
+
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 ${
                 semester.isCompleted 
                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
@@ -44,9 +47,22 @@ export default function SemesterCard({
                   </>
                 )}
               </span>
+
+              {/* SGPA Performance Rating Tag */}
+              <span 
+                className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border flex items-center gap-1"
+                style={{
+                  backgroundColor: perfDetails.bgColor,
+                  color: perfDetails.color,
+                  borderColor: perfDetails.borderColor,
+                }}
+              >
+                <Award className="w-3 h-3" />
+                <span>SGPA: {perfDetails.shortTag}</span>
+              </span>
             </div>
 
-            <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-2">
+            <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-2 flex-wrap">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" /> {semester.academicYear || 'Academic Year'}
               </span>
@@ -54,6 +70,8 @@ export default function SemesterCard({
               <span>{stats.courseCount} Courses</span>
               <span>•</span>
               <span>{stats.totalCredits} Credit Hours</span>
+              <span>•</span>
+              <span className="font-bold text-slate-700">{stats.totalQualityPoints.toFixed(1)} Q.Pts</span>
             </p>
           </div>
         </div>
@@ -62,7 +80,7 @@ export default function SemesterCard({
         <div className="flex items-center justify-between sm:justify-end space-x-3">
           <div className="text-right">
             <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block">Semester GPA</span>
-            <span className="text-xl font-bold font-mono text-[#800000]">
+            <span className="text-2xl font-black font-mono text-[#800000]">
               {stats.gpa.toFixed(2)}
             </span>
           </div>
@@ -70,10 +88,10 @@ export default function SemesterCard({
           <div className="flex items-center space-x-1.5 pl-2 border-l border-slate-200">
             <button
               onClick={() => onSelectSemester(semester.id)}
-              className="p-2 text-[#800000] hover:bg-red-50 rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1"
-              title="Open Semester Details & Add Courses"
+              className="p-2 text-[#800000] hover:bg-red-50 rounded-xl font-bold text-xs transition-colors flex items-center space-x-1 bg-amber-50/60 border border-amber-200/80"
+              title="Open Semester SGPA Details & Course Management"
             >
-              <span>Manage</span>
+              <span>SGPA Details</span>
               <ExternalLink className="w-4 h-4" />
             </button>
 
